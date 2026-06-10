@@ -1,13 +1,37 @@
 {
-  "name": "Total Tools",
+  "name": "Total Tools — Asistencias & Yape",
   "short_name": "TotalTools",
+  "description": "Control de asistencias y alertas Yape para Total Tools",
   "start_url": "/Yapeclock/",
   "scope": "/Yapeclock/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#0f0f1a",
   "theme_color": "#7c4dff",
   "icons": [
-    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"}
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Marcar asistencia",
+      "url": "/Yapeclock/asistencias.html",
+      "description": "Ir directo a marcar asistencia"
+    },
+    {
+      "name": "Alertas Yape",
+      "url": "/Yapeclock/",
+      "description": "Ver alertas de pago Yape"
+    }
   ]
 }

@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#1a1a2e">
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Asistencias">
 <title>Asistencias</title>
 <style>
 :root{
@@ -175,7 +180,7 @@ button{font-family:inherit;border:0;cursor:pointer}
 
   <div class="btn-row">
     <button class="btn pri" id="btnAbrirCam">📸 Reconocer cara</button>
-    <button class="btn ok" id="btnHuella">👆 Huella digital</button>
+    <button class="btn ok" id="btnHuella">🔐 Biométrico</button>
   </div>
 
   <div class="asis-list" id="asisList">
@@ -300,7 +305,7 @@ let asistencias = {};   // {'2026-06-09': [{empId, hora, metodo}]}
 let config      = { apiKey: '' };
 let streamActivo = null;
 let fotoNueva   = null;    // base64 foto nueva empleada
-let huellaIdNueva = null;  // credentialId WebAuthn nueva empleada
+let huellaIdNueva = [];  // credentialId WebAuthn nueva empleada
 let modoModal   = 'marcar'; // 'marcar' | 'registrar'
 let resultadoReconocido = null; // empleada reconocida pendiente confirmar
 
@@ -349,7 +354,7 @@ function pintarEmpleadas(){
     const div=document.createElement('div');
     div.className='emp-card';
     const tieneCara  = !!emp.foto;
-    const tieneHuella= !!emp.credId;
+    const tieneHuella= !!(emp.credIds&&emp.credIds.length);
     div.innerHTML=`
       <div class="emp-foto">
         ${emp.foto ? `<img src="${emp.foto}">` : '👤'}
@@ -375,12 +380,14 @@ function editarEmpleada(id){
   if(!emp) return;
   $('nuevoNombre').value=emp.nombre;
   fotoNueva=emp.foto||null;
-  huellaIdNueva=emp.credId||null;
+  huellaIdNueva=emp.credIds||[];
   if(fotoNueva){
     $('fotoImg').src=fotoNueva;
     $('fotoPreview').style.display='block';
   }
-  $('huellaStatus').textContent=emp.credId?'✓ Huella registrada':'Sin huella';
+  $('huellaStatus').innerHTML=(emp.credIds&&emp.credIds.length)
+    ? emp.credIds.map(h=>`✓ ${h.etiqueta}`).join('<br>')
+    : 'Sin huellas registradas';
   $('btnGuardarEmp').dataset.editId=id;
   abrirModalNueva();
 }
@@ -393,7 +400,7 @@ function eliminarEmpleada(id){
 
 // ─── MODAL NUEVA EMPLEADA ─────────────────────────────────────
 $('btnNuevaEmp').onclick = ()=>{
-  fotoNueva=null; huellaIdNueva=null;
+  fotoNueva=null; huellaIdNueva=[];
   $('nuevoNombre').value='';
   $('fotoPreview').style.display='none';
   $('huellaStatus').textContent='';
@@ -427,14 +434,16 @@ $('btnTomarFoto').onclick = ()=>{
 };
 
 $('btnRegHuella').onclick = async ()=>{
+  const nombre = $('nuevoNombre').value.trim()||'empleada';
+  const etiqueta = prompt('Nombre para esta huella (ej: Pulgar derecho, Cara):','Huella '+(huellaIdNueva.length+1));
+  if(!etiqueta) return;
   try{
-    const nombre = $('nuevoNombre').value.trim()||'empleada';
     const id = await registrarHuella(nombre);
-    huellaIdNueva = id;
-    $('huellaStatus').textContent = '✓ Huella registrada';
-    toast('Huella registrada ✓');
+    huellaIdNueva.push({ id, etiqueta });
+    $('huellaStatus').innerHTML = huellaIdNueva.map(h=>`✓ ${h.etiqueta}`).join('<br>');
+    toast('✓ '+etiqueta+' registrada');
   }catch(e){
-    toast('No se pudo registrar huella: '+e.message,'err');
+    toast('No se pudo registrar: '+e.message,'err');
   }
 };
 
@@ -446,13 +455,13 @@ $('btnGuardarEmp').onclick = ()=>{
   const editId = $('btnGuardarEmp').dataset.editId;
   if(editId){
     const emp=empleadas.find(e=>e.id===editId);
-    if(emp){ emp.nombre=nombre; emp.foto=fotoNueva; if(huellaIdNueva) emp.credId=huellaIdNueva; }
+    if(emp){ emp.nombre=nombre; emp.foto=fotoNueva; emp.credIds=huellaIdNueva||[]; }
     toast('Empleada actualizada ✓');
   } else {
     empleadas.push({
       id: 'e'+Date.now(),
       nombre, foto:fotoNueva,
-      credId: huellaIdNueva||null
+      credIds: huellaIdNueva||[]
     });
     toast('Empleada registrada ✓');
   }
@@ -626,16 +635,17 @@ async function registrarHuella(nombreEmp){
 }
 
 async function verificarHuella(emp){
-  // Pedimos verificación de usuario (huella/biométrico)
   const challenge = crypto.getRandomValues(new Uint8Array(32));
   const opts = { publicKey:{
     challenge, timeout:60000, userVerification:'required',
     rpId: location.hostname
   }};
-  // Si tiene credId específico, solo permitir esa
-  if(emp.credId){
-    const rawId = Uint8Array.from(atob(emp.credId), c=>c.charCodeAt(0));
-    opts.publicKey.allowCredentials=[{ type:'public-key', id:rawId }];
+  // Permitir cualquiera de sus huellas/biométricos registrados
+  if(emp.credIds && emp.credIds.length){
+    opts.publicKey.allowCredentials = emp.credIds.map(h=>({
+      type:'public-key',
+      id: Uint8Array.from(atob(h.id), c=>c.charCodeAt(0))
+    }));
   }
   await navigator.credentials.get(opts);
   return true;
@@ -643,7 +653,7 @@ async function verificarHuella(emp){
 
 $('btnHuella').onclick = async ()=>{
   if(empleadas.length===0){ toast('Registra empleadas primero','warn'); return; }
-  const conHuella = empleadas.filter(e=>e.credId);
+  const conHuella = empleadas.filter(e=>e.credIds&&e.credIds.length);
   if(conHuella.length===0){ toast('Ninguna empleada tiene huella registrada','warn'); return; }
 
   // Si hay varias, preguntar cuál
@@ -805,6 +815,13 @@ $('fechaHoy').textContent = new Date().toLocaleDateString('es-PE',{
 // ─── ARRANQUE ─────────────────────────────────────────────────
 cargarTodo();
 pintarAsistenciaHoy();
+
+// Registrar Service Worker para PWA
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/Yapeclock/sw.js')
+    .then(()=>console.log('SW registrado'))
+    .catch(e=>console.log('SW error:',e));
+}
 </script>
 </body>
 </html>
