@@ -215,17 +215,40 @@ function hablar(txt){
 
 /* ---------- parser ---------- */
 function parsear(p){
-  let nombre = (p.nombre||'').trim();
+  // MacroDroid manda {t: titulo, m: texto_grande}
+  // También soporta {nombre, monto, texto} por compatibilidad
+  const titulo = (p.t || p.titulo || p.title || p.nombre || '').trim();
+  const grande = (p.m || p.grande || p.texto || p.mensaje || '').trim();
+  const texto  = grande || titulo;
+
+  let nombre = '';
   let monto  = (p.monto||'').toString().trim();
-  const texto = (p.texto||p.title||p.mensaje||'').toString();
+
+  // Formatos Yape conocidos:
+  // "¡Juan Pérez te envió S/ 25.00!"
+  // "Te enviaron S/ 50.00 de María García"
+  // "Juan Pérez te yapeo S/ 10"
+  // "Recibiste S/ 30.00 de Pedro López"
+  const rxNombres = [
+    /^[¡]?(.+?)\s+te\s+(?:envió|yapeó|yapeo|mandó)/i,
+    /de\s+([^.,\n!¡]+?)(?:\s*[!.]|$)/i,
+    /^[¡]?(.+?)\s+te\s+/i,
+  ];
+  for(const rx of rxNombres){
+    const m = texto.match(rx);
+    if(m && m[1] && m[1].length < 50){
+      nombre = m[1].trim();
+      break;
+    }
+  }
+
   if(!monto){
-    try{ const m=texto.match(new RegExp(cfg.rxMonto,'i')); if(m) monto=m[1]; }catch(e){}
+    const m = texto.match(/S\/\.?\s*([\d]+(?:[.,]\d{1,2})?)/i);
+    if(m) monto = m[1];
   }
-  if(!nombre){
-    try{ const m=texto.match(new RegExp(cfg.rxNom,'i')); if(m) nombre=m[1].trim(); }catch(e){}
-  }
+
   monto = monto.replace(/[^\d.,]/g,'').replace(',','.');
-  return { nombre: nombre||'Pago Yape', monto: monto||'?', texto, ts: p.ts||Date.now() };
+  return { nombre: nombre||titulo||'Pago Yape', monto: monto||'?', texto, ts: p.ts||Date.now() };
 }
 
 /* ---------- mostrar pago ---------- */
