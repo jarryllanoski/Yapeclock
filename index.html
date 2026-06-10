@@ -8,452 +8,960 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Total Tools">
-<title>Alertas Yape</title>
+<title>Total Tools</title>
 <style>
-  :root{
-    --yape:#6E2585; --yape2:#9B4DCA; --bg:#13101a; --card:#1e1827;
-    --ok:#28c76f; --txt:#f4f0fa; --mut:#9a8fb0; --line:#2c2438;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  body{
-    font-family:-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;
-    background:var(--bg);color:var(--txt);min-height:100vh;
-    padding:14px 14px 40px;max-width:520px;margin:0 auto;
-  }
-  header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-  .logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--yape),var(--yape2));
-    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px}
-  h1{font-size:18px;font-weight:700;flex:1}
-  .dot{width:10px;height:10px;border-radius:50%;background:#e74c3c;transition:.3s}
-  .dot.on{background:var(--ok);box-shadow:0 0 10px var(--ok)}
+:root{
+  --yape:#6E2585;--yape2:#9B4DCA;--acc:#7c4dff;--acc2:#b388ff;
+  --bg:#0f0f1a;--card:#1a1727;--card2:#221f30;
+  --ok:#28c76f;--warn:#ffab40;--err:#ff5252;
+  --txt:#f4f0fa;--mut:#8a80a0;--line:#2a2440;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg);color:var(--txt);min-height:100vh;
+  padding:0 0 80px;max-width:520px;margin:0 auto}
 
-  .pago{
-    background:linear-gradient(160deg,var(--yape),#3d144d);
-    border-radius:22px;padding:26px 20px;text-align:center;margin-bottom:14px;
-    min-height:190px;display:flex;flex-direction:column;justify-content:center;
-    box-shadow:0 8px 30px rgba(110,37,133,.35);transition:transform .15s}
-  .pago.flash{transform:scale(1.03)}
-  .pago .lbl{font-size:13px;color:#e9d7f5;letter-spacing:1px;text-transform:uppercase}
-  .pago .nombre{font-size:22px;font-weight:600;margin:8px 0 4px;word-break:break-word}
-  .pago .monto{font-size:54px;font-weight:800;line-height:1.05}
-  .pago .monto small{font-size:24px;font-weight:600;opacity:.85}
-  .pago .hora{font-size:13px;color:#dcc6ea;margin-top:8px}
-  .pago.vacio{background:var(--card);color:var(--mut)}
+/* ── APP HEADER ── */
+.app-header{display:flex;align-items:center;gap:10px;padding:16px 16px 0}
+.app-logo{width:38px;height:38px;border-radius:11px;
+  background:linear-gradient(135deg,var(--yape),var(--acc2));
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex-shrink:0}
+.app-title{font-size:17px;font-weight:700;flex:1}
+.dot{width:10px;height:10px;border-radius:50%;background:#e74c3c;transition:.3s;flex-shrink:0}
+.dot.on{background:var(--ok);box-shadow:0 0 8px var(--ok)}
 
-  .modos{display:flex;gap:8px;margin-bottom:14px}
-  .modo{flex:1;background:var(--card);border:2px solid var(--line);border-radius:14px;
-    padding:12px;text-align:center;font-size:13px;font-weight:600;color:var(--mut);cursor:pointer}
-  .modo.sel{border-color:var(--yape2);color:var(--txt);background:#27203a}
-  .modo .ic{font-size:20px;display:block;margin-bottom:4px}
+/* ── BOTTOM NAV ── */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:520px;background:#13111d;
+  border-top:1px solid var(--line);display:flex;z-index:50}
+.bni{flex:1;display:flex;flex-direction:column;align-items:center;
+  padding:10px 4px 12px;font-size:10px;color:var(--mut);cursor:pointer;gap:3px;transition:.2s}
+.bni .ico{font-size:22px;line-height:1}
+.bni.sel{color:var(--acc2)}
+.bni.sel .ico{filter:drop-shadow(0 0 6px var(--acc2))}
 
-  .hist{background:var(--card);border-radius:16px;overflow:hidden}
-  .hist h2{font-size:13px;color:var(--mut);padding:12px 16px;border-bottom:1px solid var(--line);
-    display:flex;justify-content:space-between}
-  .item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
-  .item:last-child{border:0}
-  .item .av{width:34px;height:34px;border-radius:50%;background:var(--yape);
-    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
-  .item .n{flex:1;font-size:15px;font-weight:500}
-  .item .n span{display:block;font-size:11px;color:var(--mut);font-weight:400}
-  .item .m{font-weight:700;color:var(--ok);font-size:15px}
-  .empty{padding:24px 16px;text-align:center;color:var(--mut);font-size:14px}
+/* ── PAGES ── */
+.page{display:none;padding:14px 16px}
+.page.vis{display:block}
 
-  .btns{display:flex;gap:8px;margin:14px 0}
-  button{font-family:inherit;border:0;cursor:pointer}
-  .b{flex:1;background:var(--card);color:var(--txt);border:1px solid var(--line);
-    border-radius:12px;padding:13px;font-size:14px;font-weight:600}
-  .b.p{background:var(--yape);border-color:var(--yape)}
+/* ── SHARED ── */
+button{font-family:inherit;border:0;cursor:pointer}
+.btn{background:var(--card2);color:var(--txt);border:1px solid var(--line);
+  border-radius:12px;padding:13px;font-size:14px;font-weight:600;font-family:inherit}
+.btn.pri{background:var(--yape);border-color:var(--yape);color:#fff}
+.btn.acc{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.ok{background:#1a3a2a;border-color:var(--ok);color:var(--ok)}
+.btn.full{width:100%}
+.btn.sm{padding:9px 12px;font-size:13px}
+.btn-row{display:flex;gap:8px;margin-bottom:12px}
+.card{background:var(--card);border-radius:16px;overflow:hidden;margin-bottom:14px}
+.card-p{padding:16px}
+.empty{padding:24px;text-align:center;color:var(--mut);font-size:14px}
+.sep{height:1px;background:var(--line);margin:12px 0}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;color:var(--mut);margin-bottom:5px}
+.field input,.field select{width:100%;background:var(--bg);border:1px solid var(--line);
+  border-radius:10px;padding:11px;color:var(--txt);font-size:14px;font-family:inherit}
+.field .hint{font-size:11px;color:var(--mut);margin-top:4px;line-height:1.5}
+.row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border:0}
+input[type=range]{width:110px}
 
-  details{background:var(--card);border-radius:16px;margin-top:14px;padding:0 16px}
-  summary{padding:14px 0;font-weight:600;font-size:14px;cursor:pointer;list-style:none}
-  summary::-webkit-details-marker{display:none}
-  summary::before{content:"⚙️ "}
-  .field{margin:0 0 14px}
-  .field label{display:block;font-size:12px;color:var(--mut);margin-bottom:5px}
-  .field input,.field select{width:100%;background:var(--bg);border:1px solid var(--line);
-    border-radius:10px;padding:11px;color:var(--txt);font-size:14px;font-family:inherit}
-  .field .hint{font-size:11px;color:var(--mut);margin-top:4px;line-height:1.4}
-  .row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line)}
-  .row:last-child{border:0}
-  .row span{font-size:14px}
-  input[type=range]{width:120px}
-  .save{width:100%;background:var(--yape);color:#fff;border-radius:12px;padding:13px;font-weight:700;margin:6px 0 16px}
-  .resumen{background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px;
-    display:flex;align-items:center;gap:14px}
-  .resumen .ic{font-size:32px;flex-shrink:0}
-  .resumen .info{flex:1}
-  .resumen .info .lbl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px}
-  .resumen .info .total{font-size:32px;font-weight:800;color:var(--ok);line-height:1.1}
-  .resumen .info .sub{font-size:12px;color:var(--mut);margin-top:3px}
-  .bxls{background:#1d6f42;color:#fff;border-radius:12px;padding:12px 14px;
-    font-size:13px;font-weight:700;white-space:nowrap;border:0;cursor:pointer;font-family:inherit}
-  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);
-    background:var(--ok);color:#fff;padding:12px 22px;border-radius:30px;font-size:14px;font-weight:600;
-    transition:transform .3s;z-index:9}
-  .toast.show{transform:translateX(-50%) translateY(0)}
+/* ── TOAST ── */
+.toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(40px);
+  padding:12px 22px;border-radius:30px;font-size:14px;font-weight:600;
+  transition:.3s;z-index:200;white-space:nowrap;opacity:0;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.ok{background:var(--ok);color:#000}
+.toast.err{background:var(--err);color:#fff}
+.toast.warn{background:var(--warn);color:#000}
+
+/* ── SPINNER ── */
+.spin{display:inline-block;width:16px;height:16px;border:3px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;margin-right:5px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ════════════════════════════════
+   PÁGINA YAPE
+════════════════════════════════ */
+.pago{background:linear-gradient(160deg,var(--yape),#3d144d);
+  border-radius:22px;padding:26px 20px;text-align:center;margin-bottom:14px;
+  min-height:185px;display:flex;flex-direction:column;justify-content:center;
+  box-shadow:0 8px 30px rgba(110,37,133,.35);transition:transform .15s}
+.pago.flash{transform:scale(1.03)}
+.pago .lbl{font-size:12px;color:#e9d7f5;letter-spacing:1px;text-transform:uppercase}
+.pago .nombre{font-size:22px;font-weight:600;margin:8px 0 4px;word-break:break-word}
+.pago .monto{font-size:54px;font-weight:800;line-height:1.05}
+.pago .monto small{font-size:22px;font-weight:600;opacity:.85}
+.pago .hora{font-size:12px;color:#dcc6ea;margin-top:8px}
+.pago.vacio{background:var(--card);color:var(--mut)}
+.modos{display:flex;gap:8px;margin-bottom:14px}
+.modo{flex:1;background:var(--card);border:2px solid var(--line);border-radius:14px;
+  padding:11px;text-align:center;font-size:12px;font-weight:600;color:var(--mut);cursor:pointer}
+.modo.sel{border-color:var(--yape2);color:var(--txt);background:#27203a}
+.modo .ic{font-size:19px;display:block;margin-bottom:3px}
+.resumen-yape{background:var(--card);border-radius:16px;padding:14px;margin-bottom:14px;
+  display:flex;align-items:center;gap:12px}
+.resumen-yape .ico{font-size:30px;flex-shrink:0}
+.resumen-yape .info{flex:1}
+.resumen-yape .info .lbl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.7px}
+.resumen-yape .info .total{font-size:30px;font-weight:800;color:var(--ok);line-height:1.1}
+.resumen-yape .info .sub{font-size:11px;color:var(--mut);margin-top:2px}
+.bxls{background:#1d6f42;color:#fff;border-radius:11px;padding:10px 13px;
+  font-size:13px;font-weight:700;white-space:nowrap;border:0;cursor:pointer;font-family:inherit}
+.yape-hist h2{font-size:12px;color:var(--mut);padding:12px 16px;border-bottom:1px solid var(--line);
+  display:flex;justify-content:space-between}
+.yitem{display:flex;align-items:center;gap:11px;padding:11px 16px;border-bottom:1px solid var(--line)}
+.yitem:last-child{border:0}
+.yitem .av{width:32px;height:32px;border-radius:50%;background:var(--yape);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.yitem .n{flex:1;font-size:14px;font-weight:500}
+.yitem .n span{display:block;font-size:11px;color:var(--mut);font-weight:400}
+.yitem .m{font-weight:700;color:var(--ok);font-size:14px}
+details.cfg{background:var(--card);border-radius:16px;margin-top:14px;padding:0 16px}
+details.cfg summary{padding:14px 0;font-weight:600;font-size:14px;cursor:pointer;list-style:none}
+details.cfg summary::-webkit-details-marker{display:none}
+details.cfg summary::before{content:"⚙️ "}
+.save{width:100%;background:var(--yape);color:#fff;border-radius:12px;
+  padding:13px;font-weight:700;margin:6px 0 16px;font-family:inherit;border:0;cursor:pointer}
+
+/* ════════════════════════════════
+   PÁGINA ASISTENCIAS
+════════════════════════════════ */
+.res-asis{background:var(--card);border-radius:16px;padding:14px;margin-bottom:14px;
+  display:flex;justify-content:space-around;text-align:center}
+.res-asis .num{font-size:28px;font-weight:800}
+.res-asis .lbl{font-size:11px;color:var(--mut);margin-top:2px}
+.res-asis .ok{color:var(--ok)}
+.res-asis .warn{color:var(--warn)}
+.atabs{display:flex;background:var(--card);border-radius:13px;padding:4px;margin-bottom:14px;gap:4px}
+.atab{flex:1;padding:9px 4px;text-align:center;font-size:12px;font-weight:600;
+  color:var(--mut);border-radius:9px;cursor:pointer;transition:.2s}
+.atab.sel{background:var(--acc);color:#fff}
+.asec{display:none}
+.asec.vis{display:block}
+.emp-card{background:var(--card);border-radius:14px;padding:13px;
+  display:flex;align-items:center;gap:11px;margin-bottom:10px}
+.efoto{width:48px;height:48px;border-radius:50%;background:var(--card2);
+  display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;overflow:hidden}
+.efoto img{width:100%;height:100%;object-fit:cover}
+.emp-info{flex:1}
+.emp-info .nombre{font-size:15px;font-weight:600}
+.emp-info .sub{font-size:11px;color:var(--mut);margin-top:2px}
+.badges{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}
+.badge{font-size:10px;padding:3px 7px;border-radius:20px;font-weight:600}
+.badge.cara{background:#1a2a4a;color:#60aaff}
+.badge.huella{background:#1a3a2a;color:#60dd88}
+.emp-acts{display:flex;flex-direction:column;gap:5px}
+.ico-btn{background:var(--card2);border:0;color:var(--txt);border-radius:9px;
+  padding:7px 10px;font-size:13px;cursor:pointer;font-family:inherit}
+.asis-card{background:var(--card);border-radius:14px;padding:13px;
+  display:flex;align-items:center;gap:11px;margin-bottom:10px}
+.afoto{width:42px;height:42px;border-radius:50%;background:var(--card2);overflow:hidden;flex-shrink:0}
+.afoto img{width:100%;height:100%;object-fit:cover}
+.asis-info{flex:1}
+.asis-info .nombre{font-size:14px;font-weight:600}
+.asis-info .hora{font-size:11px;color:var(--mut);margin-top:2px}
+.asis-estado{font-size:20px}
+.hist-dia{background:var(--card);border-radius:13px;overflow:hidden;margin-bottom:10px}
+.hist-dia .hd{background:var(--card2);padding:10px 14px;font-size:13px;font-weight:600;
+  display:flex;justify-content:space-between;color:var(--mut)}
+.hist-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.hist-row:last-child{border:0}
+.hist-row .hn{flex:1;font-size:14px}
+.hist-row .hh{font-size:12px;color:var(--mut)}
+
+/* ── MODAL ── */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:100;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px}
+.modal.hide{display:none}
+.modal-card{background:var(--card);border-radius:20px;padding:16px;width:100%;max-width:400px;
+  max-height:90vh;overflow-y:auto}
+.modal-card h3{font-size:15px;font-weight:700;margin-bottom:12px;text-align:center}
+.cam-wrap{position:relative;width:100%;border-radius:14px;overflow:hidden;
+  background:#000;margin-bottom:12px;aspect-ratio:4/3}
+.cam-wrap video,.cam-wrap canvas{width:100%;height:100%;object-fit:cover;display:block}
+.cam-wrap canvas{display:none}
+.cam-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.cam-frame{width:170px;height:210px;border:3px solid rgba(124,77,255,.8);
+  border-radius:50%;box-shadow:0 0 0 9999px rgba(0,0,0,.4)}
+.cam-frame.ok{border-color:var(--ok);box-shadow:0 0 20px var(--ok),0 0 0 9999px rgba(0,0,0,.4)}
+.cam-label{position:absolute;bottom:10px;left:0;right:0;text-align:center;
+  font-size:13px;color:#fff;text-shadow:0 1px 4px #000}
+.resultado{background:var(--card2);border-radius:13px;padding:13px;margin-bottom:12px;
+  text-align:center;display:none}
+.resultado.vis{display:block}
+.resultado .rnom{font-size:19px;font-weight:700;margin:6px 0 4px}
+.resultado .rsub{font-size:12px;color:var(--mut)}
+.resultado .rconf{font-size:13px;margin-top:5px;font-weight:600}
+.foto-preview{display:none;margin-bottom:10px;text-align:center}
+.foto-preview img{width:85px;height:85px;border-radius:50%;object-fit:cover;border:3px solid var(--ok)}
+.foto-preview .ok-lbl{font-size:12px;color:var(--ok);margin-top:4px}
+.huella-status{font-size:12px;color:var(--mut);margin-bottom:10px;line-height:1.6}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">Y</div>
-  <h1>Alertas Yape</h1>
-  <div class="dot" id="dot" title="Conexión"></div>
-</header>
-
-<div class="pago vacio" id="pago">
-  <div class="lbl">Esperando pagos…</div>
-  <div class="nombre" id="pNom"></div>
-  <div class="monto" id="pMon"></div>
-  <div class="hora" id="pHora"></div>
+<!-- ══ HEADER ══ -->
+<div class="app-header">
+  <div class="app-logo">TT</div>
+  <div class="app-title">Total Tools</div>
+  <div class="dot" id="dot"></div>
 </div>
 
-<div class="modos">
-  <div class="modo" data-modo="sonido"><span class="ic">🔔</span>Solo sonido</div>
-  <div class="modo" data-modo="voz"><span class="ic">🗣️</span>Leer todo (voz)</div>
-</div>
+<!-- ══════════════════════════════════
+     PÁGINA 1: YAPE
+══════════════════════════════════ -->
+<div class="page vis" id="page-yape">
 
-<div class="resumen">
-  <div class="ic">💰</div>
-  <div class="info">
-    <div class="lbl" id="resLbl">Total de hoy</div>
-    <div class="total"><small style="font-size:16px;font-weight:600">S/ </small><span id="resTotal">0.00</span></div>
-    <div class="sub" id="resSub">0 pagos · S/ 0.00 promedio</div>
-  </div>
-  <button class="bxls" id="btnExcel">⬇ Excel</button>
-</div>
+  <div style="height:14px"></div>
 
-<div class="hist">
-  <h2><span>Pagos de hoy</span><span id="contador">0</span></h2>
-  <div id="lista"><div class="empty">Aún no hay pagos registrados.</div></div>
-</div>
-
-<div class="btns">
-  <button class="b p" id="btnProbar">▶ Probar alerta</button>
-  <button class="b" id="btnLimpiar">🗑 Limpiar lista</button>
-</div>
-
-<details id="config">
-  <summary>Configuración</summary>
-
-  <div class="field">
-    <label>URL de Firebase Realtime Database</label>
-    <input id="cfgUrl" placeholder="https://tu-proyecto-default-rtdb.firebaseio.com">
-    <div class="hint">Pega la URL de tu Realtime Database. La app leerá el nodo <b>/yape</b>.</div>
+  <div class="pago vacio" id="pago">
+    <div class="lbl">Esperando pagos…</div>
+    <div class="nombre" id="pNom"></div>
+    <div class="monto" id="pMon"></div>
+    <div class="hora" id="pHora"></div>
   </div>
 
-  <div class="field">
-    <label>Frase que se leerá en voz (modo voz)</label>
-    <input id="cfgFrase" value="Yape recibido de {nombre}, {monto} soles">
-    <div class="hint">Usa <b>{nombre}</b> y <b>{monto}</b> y se reemplazan solos.</div>
+  <div class="modos">
+    <div class="modo" data-modo="sonido"><span class="ic">🔔</span>Solo sonido</div>
+    <div class="modo" data-modo="voz"><span class="ic">🗣️</span>Leer todo (voz)</div>
   </div>
 
-  <div class="field">
-    <label>Voz</label>
-    <select id="cfgVoz"></select>
+  <div class="resumen-yape">
+    <div class="ico">💰</div>
+    <div class="info">
+      <div class="lbl" id="yResLbl">Total de hoy</div>
+      <div class="total"><small style="font-size:15px;font-weight:600">S/ </small><span id="yResTotal">0.00</span></div>
+      <div class="sub" id="yResSub">0 pagos · S/ 0.00 promedio</div>
+    </div>
+    <button class="bxls" id="btnExcel">⬇ Excel</button>
   </div>
 
-  <div class="row"><span>Volumen del sonido</span><input type="range" id="cfgVol" min="0" max="1" step="0.1" value="0.8"></div>
-  <div class="row"><span>Repetir alerta 2 veces</span><input type="checkbox" id="cfgRep"></div>
+  <div class="card yape-hist">
+    <h2><span>Pagos de hoy</span><span id="yContador">0</span></h2>
+    <div id="yLista"><div class="empty">Aún no hay pagos registrados.</div></div>
+  </div>
 
-  <details style="background:transparent;padding:0;margin:8px 0 0">
-    <summary style="font-size:13px;color:var(--mut)">Opciones avanzadas (parser)</summary>
-    <div class="field" style="margin-top:10px">
-      <label>Regex para el monto</label>
-      <input id="cfgRxMonto" value="S/\.?\s*([\d.,]+)">
+  <div class="btn-row">
+    <button class="btn pri" style="flex:1" id="btnProbar">▶ Probar alerta</button>
+    <button class="btn" style="flex:1" id="btnLimpiar">🗑 Limpiar</button>
+  </div>
+
+  <details class="cfg" id="yCfg">
+    <summary>Configuración Yape</summary>
+    <div class="field" style="margin-top:12px">
+      <label>URL Firebase Realtime Database</label>
+      <input id="cfgUrl" placeholder="https://tu-proyecto-default-rtdb.firebaseio.com">
+      <div class="hint">La app leerá el nodo <b>/yape</b>.</div>
     </div>
     <div class="field">
-      <label>Regex para el nombre (opcional)</label>
-      <input id="cfgRxNom" value="(?:de|recibiste de|pago de)\s+([^.,\n]+)">
-      <div class="hint">Solo se usa si MacroDroid no envía el campo "nombre" aparte.</div>
+      <label>Frase en modo voz</label>
+      <input id="cfgFrase" value="Yape recibido de {nombre}, {monto} soles">
+      <div class="hint">Usa <b>{nombre}</b> y <b>{monto}</b>.</div>
     </div>
+    <div class="field">
+      <label>Voz</label>
+      <select id="cfgVoz"></select>
+    </div>
+    <div class="row"><span>Volumen</span><input type="range" id="cfgVol" min="0" max="1" step="0.1" value="0.8"></div>
+    <div class="row"><span>Repetir alerta 2 veces</span><input type="checkbox" id="cfgRep"></div>
+    <button class="save" id="btnGuardar">Guardar configuración</button>
   </details>
 
-  <button class="save" id="btnGuardar">Guardar configuración</button>
-</details>
+</div><!-- /page-yape -->
+
+<!-- ══════════════════════════════════
+     PÁGINA 2: ASISTENCIAS
+══════════════════════════════════ -->
+<div class="page" id="page-asis">
+  <div style="height:14px"></div>
+
+  <!-- resumen -->
+  <div class="res-asis">
+    <div><div class="num ok" id="aPresentes">0</div><div class="lbl">Presentes</div></div>
+    <div><div class="num warn" id="aAusentes">0</div><div class="lbl">Ausentes</div></div>
+    <div><div class="num" id="aTotal">0</div><div class="lbl">Total</div></div>
+  </div>
+
+  <!-- sub-tabs -->
+  <div class="atabs">
+    <div class="atab sel" data-atab="marcar">📸 Marcar</div>
+    <div class="atab" data-atab="empleadas">👤 Empleadas</div>
+    <div class="atab" data-atab="historial">📋 Historial</div>
+    <div class="atab" data-atab="acfg">⚙️ Config</div>
+  </div>
+
+  <!-- SUB: MARCAR -->
+  <div class="asec vis" id="asec-marcar">
+    <div class="btn-row">
+      <button class="btn acc" style="flex:1" id="btnAbrirCam">📸 Reconocer cara</button>
+      <button class="btn ok" style="flex:1" id="btnHuella">🔐 Biométrico</button>
+    </div>
+    <div id="aLista"><div class="empty">Registra empleadas primero.</div></div>
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn full" id="btnExcelAsis">⬇ Exportar Excel del día</button>
+    </div>
+  </div>
+
+  <!-- SUB: EMPLEADAS -->
+  <div class="asec" id="asec-empleadas">
+    <div class="btn-row">
+      <button class="btn acc full" id="btnNuevaEmp">+ Nueva empleada</button>
+    </div>
+    <div id="empGrid"><div class="empty">No hay empleadas registradas.</div></div>
+  </div>
+
+  <!-- SUB: HISTORIAL -->
+  <div class="asec" id="asec-historial">
+    <div id="histContainer"><div class="empty">Sin historial aún.</div></div>
+    <div class="btn-row" style="margin-top:10px">
+      <button class="btn full" id="btnExcelHist">⬇ Excel del mes</button>
+    </div>
+  </div>
+
+  <!-- SUB: CONFIG ASISTENCIAS -->
+  <div class="asec" id="asec-acfg">
+    <div class="card card-p">
+      <div class="field">
+        <label>API Key de Anthropic (reconocimiento facial)</label>
+        <input type="password" id="aApiKey" placeholder="sk-ant-...">
+        <div class="hint">Obtenla gratis en <b>console.anthropic.com</b>. Se guarda solo aquí.</div>
+      </div>
+      <button class="btn acc full" id="btnGuardarACfg">Guardar API Key</button>
+    </div>
+    <div class="card card-p" style="margin-top:0">
+      <button class="btn full" style="color:var(--err);border-color:var(--err)" id="btnBorrarAsis">
+        🗑 Borrar datos de asistencias
+      </button>
+    </div>
+  </div>
+
+</div><!-- /page-asis -->
+
+<!-- ══ BOTTOM NAV ══ -->
+<nav class="bnav">
+  <div class="bni sel" data-page="yape">
+    <div class="ico">💜</div>Yape
+  </div>
+  <div class="bni" data-page="asis">
+    <div class="ico">👥</div>Asistencias
+  </div>
+</nav>
+
+<!-- ══ MODAL: RECONOCIMIENTO ══ -->
+<div class="modal hide" id="modalCam">
+  <div class="modal-card">
+    <h3 id="mCamTitulo">Reconocer empleada</h3>
+    <div class="cam-wrap">
+      <video id="camVideo" autoplay playsinline muted></video>
+      <canvas id="camCanvas"></canvas>
+      <div class="cam-overlay"><div class="cam-frame" id="camFrame"></div></div>
+      <div class="cam-label" id="camLabel">Apunta al rostro</div>
+    </div>
+    <div class="resultado" id="resultadoBox">
+      <div id="resFotoEl"></div>
+      <div class="rnom" id="resNombre"></div>
+      <div class="rsub" id="resSub2"></div>
+      <div class="rconf" id="resConf"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="btnCerrarCam">✕ Cancelar</button>
+      <button class="btn acc" id="btnCapturar">📸 Capturar</button>
+      <button class="btn ok" id="btnConfirmar" style="display:none">✓ Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: NUEVA EMPLEADA ══ -->
+<div class="modal hide" id="modalNueva">
+  <div class="modal-card">
+    <h3>Registrar empleada</h3>
+    <div class="field">
+      <label>Nombre completo</label>
+      <input type="text" id="nuevoNombre" placeholder="Ej: María García">
+    </div>
+    <div class="field"><label>Foto del rostro</label></div>
+    <div class="cam-wrap">
+      <video id="camVideo2" autoplay playsinline muted></video>
+      <canvas id="camCanvas2"></canvas>
+      <div class="cam-overlay"><div class="cam-frame" id="camFrame2"></div></div>
+      <div class="cam-label">Centra el rostro en el óvalo</div>
+    </div>
+    <div class="foto-preview" id="fotoPreview">
+      <img id="fotoImg" src="" alt="foto">
+      <div class="ok-lbl">✓ Foto capturada</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn sm acc" id="btnTomarFoto">📸 Tomar foto</button>
+      <button class="btn sm ok" id="btnRegHuella">🔐 Agregar biométrico</button>
+    </div>
+    <div class="huella-status" id="huellaStatus"></div>
+    <div class="sep"></div>
+    <div class="btn-row">
+      <button class="btn" style="flex:1" id="btnCerrarNueva">Cancelar</button>
+      <button class="btn acc" style="flex:1" id="btnGuardarEmp">Guardar</button>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
 <script>
+// ═══════════════════════════════════════════════════
+// UTILIDADES GLOBALES
+// ═══════════════════════════════════════════════════
 const $ = id => document.getElementById(id);
-const LS = 'yapeAlert.cfg';
-const LS_PAGOS = 'yapeAlert.pagos';
-let pagosHoy = [];
-let cfg = {
-  url:'', modo:'voz', frase:'Yape recibido de {nombre}, {monto} soles',
-  voz:'', vol:0.8, rep:false,
-  rxMonto:'S/\\.?\\s*([\\d.,]+)', rxNom:'(?:de|recibiste de|pago de)\\s+([^.,\\n]+)'
-};
-let seen = new Set();          // IDs ya procesados
-let primerCarga = true;        // no sonar al abrir
-let pollTimer = null;
+const fechaHoy = () => new Date().toLocaleDateString('es-PE');
+const horaAhora = () => new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});
 
-/* ---------- almacenamiento ---------- */
-function fechaHoy(){ return new Date().toLocaleDateString('es-PE'); }
-function cargar(){
-  try{ const s=localStorage.getItem(LS); if(s) cfg={...cfg,...JSON.parse(s)}; }catch(e){}
+function toast(msg, tipo='ok'){
+  const t=$('toast');
+  t.textContent=msg;
+  t.className='toast show '+tipo;
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>t.className='toast',2400);
+}
+
+// ── BOTTOM NAV ──────────────────────────────────────
+document.querySelectorAll('.bni').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('.bni').forEach(x=>x.classList.remove('sel'));
+    document.querySelectorAll('.page').forEach(x=>x.classList.remove('vis'));
+    b.classList.add('sel');
+    $('page-'+b.dataset.page).classList.add('vis');
+    if(b.dataset.page==='asis') pintarAsistenciaHoy();
+  };
+});
+
+// ── ASISTENCIAS SUB-TABS ────────────────────────────
+document.querySelectorAll('.atab').forEach(t=>{
+  t.onclick=()=>{
+    document.querySelectorAll('.atab').forEach(x=>x.classList.remove('sel'));
+    document.querySelectorAll('.asec').forEach(x=>x.classList.remove('vis'));
+    t.classList.add('sel');
+    $('asec-'+t.dataset.atab).classList.add('vis');
+    if(t.dataset.atab==='empleadas') pintarEmpleadas();
+    if(t.dataset.atab==='historial') pintarHistorial();
+    if(t.dataset.atab==='acfg') $('aApiKey').value=aCfg.apiKey||'';
+  };
+});
+
+// ═══════════════════════════════════════════════════
+// MÓDULO YAPE
+// ═══════════════════════════════════════════════════
+const LS_Y   = 'yapeAlert.cfg';
+const LS_PAG = 'yapeAlert.pagos';
+let pagosHoy=[], yapeSeenKeys=new Set(), primerCarga=true, pollTimer=null;
+let yCfg={url:'',modo:'voz',frase:'Yape recibido de {nombre}, {monto} soles',voz:'',vol:.8,rep:false};
+
+function yCargar(){
+  try{const s=localStorage.getItem(LS_Y);if(s)yCfg={...yCfg,...JSON.parse(s)};}catch(e){}
   try{
-    const s=localStorage.getItem(LS_PAGOS);
-    if(s){
-      const obj=JSON.parse(s);
-      if(obj.fecha===fechaHoy()){
-        pagosHoy=obj.pagos||[];
-        // Marcar keys de Firebase ya guardados para no duplicar
-        pagosHoy.forEach(p=>{ if(p._key) seen.add(p._key); });
-      }
-    }
+    const s=localStorage.getItem(LS_PAG);
+    if(s){const o=JSON.parse(s);if(o.fecha===fechaHoy()){
+      pagosHoy=o.pagos||[];
+      pagosHoy.forEach(p=>{if(p._key)yapeSeenKeys.add(p._key);});
+    }}
   }catch(e){}
 }
-function guardar(){ try{ localStorage.setItem(LS,JSON.stringify(cfg)); }catch(e){} }
-function guardarPagos(){ try{ localStorage.setItem(LS_PAGOS,JSON.stringify({fecha:fechaHoy(),pagos:pagosHoy})); }catch(e){} }
+function yGuardar(){try{localStorage.setItem(LS_Y,JSON.stringify(yCfg));}catch(e){}}
+function yGuardarPagos(){try{localStorage.setItem(LS_PAG,JSON.stringify({fecha:fechaHoy(),pagos:pagosHoy}));}catch(e){}}
 
-/* ---------- sonido (sin archivos externos) ---------- */
+// Audio
 let actx;
 function beep(){
   try{
-    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
-    if(actx.state==='suspended') actx.resume();
-    const notas=[660,880,1175], t0=actx.currentTime;
+    actx=actx||new(window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==='suspended')actx.resume();
+    const notas=[660,880,1175],t0=actx.currentTime;
     notas.forEach((f,i)=>{
-      const o=actx.createOscillator(), g=actx.createGain();
-      o.type='sine'; o.frequency.value=f;
-      const s=t0+i*0.13;
+      const o=actx.createOscillator(),g=actx.createGain();
+      o.type='sine';o.frequency.value=f;
+      const s=t0+i*.13;
       g.gain.setValueAtTime(0,s);
-      g.gain.linearRampToValueAtTime(cfg.vol,s+0.02);
-      g.gain.exponentialRampToValueAtTime(0.001,s+0.22);
-      o.connect(g); g.connect(actx.destination);
-      o.start(s); o.stop(s+0.24);
+      g.gain.linearRampToValueAtTime(yCfg.vol,s+.02);
+      g.gain.exponentialRampToValueAtTime(.001,s+.22);
+      o.connect(g);g.connect(actx.destination);
+      o.start(s);o.stop(s+.24);
     });
   }catch(e){}
-}
-
-/* ---------- voz ---------- */
-function cargarVoces(){
-  const sel=$('cfgVoz'); sel.innerHTML='';
-  const voces=speechSynthesis.getVoices().filter(v=>v.lang.startsWith('es'));
-  (voces.length?voces:speechSynthesis.getVoices()).forEach(v=>{
-    const o=document.createElement('option');
-    o.value=v.name; o.textContent=v.name+' ('+v.lang+')';
-    if(v.name===cfg.voz) o.selected=true;
-    sel.appendChild(o);
-  });
 }
 function hablar(txt){
   try{
     speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(txt);
-    u.lang='es-PE'; u.rate=1; u.volume=1;
-    const v=speechSynthesis.getVoices().find(x=>x.name===cfg.voz);
-    if(v) u.voice=v;
+    u.lang='es-PE';u.rate=1;u.volume=1;
+    const v=speechSynthesis.getVoices().find(x=>x.name===yCfg.voz);
+    if(v)u.voice=v;
     speechSynthesis.speak(u);
   }catch(e){}
 }
-
-/* ---------- parser ---------- */
-function parsear(p, _key){
-  // MacroDroid manda {t: titulo, m: texto_grande}
-  // También soporta {nombre, monto, texto} por compatibilidad
-  const titulo = (p.t || p.titulo || p.title || p.nombre || '').trim();
-  const grande = (p.m || p.grande || p.texto || p.mensaje || '').trim();
-  const texto  = grande || titulo;
-
-  let nombre = '';
-  let monto  = (p.monto||'').toString().trim();
-
-  // Formatos Yape conocidos:
-  // "¡Juan Pérez te envió S/ 25.00!"
-  // "Te enviaron S/ 50.00 de María García"
-  // "Juan Pérez te yapeo S/ 10"
-  // "Recibiste S/ 30.00 de Pedro López"
-  const rxNombres = [
-    /^[¡]?(.+?)\s+te\s+(?:envió|yapeó|yapeo|mandó)/i,
-    /de\s+([^.,\n!¡]+?)(?:\s*[!.]|$)/i,
-    /^[¡]?(.+?)\s+te\s+/i,
-  ];
-  for(const rx of rxNombres){
-    const m = texto.match(rx);
-    if(m && m[1] && m[1].length < 50){
-      nombre = m[1].trim();
-      break;
-    }
-  }
-
-  if(!monto){
-    const m = texto.match(/S\/\.?\s*([\d]+(?:[.,]\d{1,2})?)/i);
-    if(m) monto = m[1];
-  }
-
-  monto = monto.replace(/[^\d.,]/g,'').replace(',','.');
-  return { nombre: nombre||titulo||'Pago Yape', monto: monto||'?', texto, ts: p.ts||Date.now(), _key: _key||'' };
+function cargarVoces(){
+  const sel=$('cfgVoz');sel.innerHTML='';
+  const vv=speechSynthesis.getVoices().filter(v=>v.lang.startsWith('es'));
+  (vv.length?vv:speechSynthesis.getVoices()).forEach(v=>{
+    const o=document.createElement('option');
+    o.value=v.name;o.textContent=v.name+' ('+v.lang+')';
+    if(v.name===yCfg.voz)o.selected=true;
+    sel.appendChild(o);
+  });
 }
 
-/* ---------- mostrar pago ---------- */
-function mostrar(d, alerta){
+// Parser
+function parsear(p,_key){
+  const titulo=(p.t||p.titulo||p.title||p.nombre||'').trim();
+  const grande=(p.m||p.grande||p.texto||p.mensaje||'').trim();
+  const texto=grande||titulo;
+  let nombre='',monto=(p.monto||'').toString().trim();
+  const rxs=[
+    /^[¡!]?(.+?)\s+te\s+(?:envió|yapeó|yapeo|mandó)/i,
+    /de\s+([^.,\n!¡]+?)(?:\s*[!.]|$)/i,
+    /^[¡!]?(.+?)\s+te\s+/i,
+  ];
+  for(const rx of rxs){const m=texto.match(rx);if(m&&m[1]&&m[1].length<50){nombre=m[1].trim();break;}}
+  if(!monto){const m=texto.match(/S\/\.?\s*([\d]+(?:[.,]\d{1,2})?)/i);if(m)monto=m[1];}
+  monto=monto.replace(/[^\d.,]/g,'').replace(',','.');
+  return{nombre:nombre||titulo||'Pago Yape',monto:monto||'?',texto,ts:p.ts||Date.now(),_key:_key||''};
+}
+
+// UI Yape
+function mostrarPago(d,alerta){
   const pago=$('pago');
   pago.classList.remove('vacio');
   pago.querySelector('.lbl').textContent='PAGO RECIBIDO';
   $('pNom').textContent=d.nombre;
   $('pMon').innerHTML='<small>S/ </small>'+d.monto;
   $('pHora').textContent=new Date(d.ts).toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});
-  if(alerta){
-    pago.classList.add('flash'); setTimeout(()=>pago.classList.remove('flash'),200);
-    disparar(d);
-  }
-  agregarHist(d);
-  pagosHoy.push(d);
-  guardarPagos();
-  actualizarResumen();
+  if(alerta){pago.classList.add('flash');setTimeout(()=>pago.classList.remove('flash'),200);disparar(d);}
+  agregarYItem(d);
+  pagosHoy.push(d);yGuardarPagos();yActualizarResumen();
 }
 function disparar(d){
-  const veces = cfg.rep?2:1;
-  for(let i=0;i<veces;i++){
-    setTimeout(()=>{
-      beep();
-      if(cfg.modo==='voz'){
-        const frase=cfg.frase.replace('{nombre}',d.nombre).replace('{monto}',d.monto);
-        setTimeout(()=>hablar(frase),i?900:550);
-      }
-    }, i*1600);
-  }
+  const veces=yCfg.rep?2:1;
+  for(let i=0;i<veces;i++) setTimeout(()=>{
+    beep();
+    if(yCfg.modo==='voz'){
+      const fr=yCfg.frase.replace('{nombre}',d.nombre).replace('{monto}',d.monto);
+      setTimeout(()=>hablar(fr),i?900:550);
+    }
+  },i*1600);
 }
-function actualizarResumen(){
-  const validos=pagosHoy.filter(p=>p.monto!=='?'&&p.monto!=='');
-  const total=validos.reduce((s,p)=>s+parseFloat(p.monto||0),0);
-  const n=pagosHoy.length, prom=n>0?(total/n).toFixed(2):'0.00';
-  $('resTotal').textContent=total.toFixed(2);
-  $('resSub').textContent=`${n} pago${n!==1?'s':''} · S/ ${prom} promedio`;
-  $('resLbl').textContent=`Total de hoy — ${fechaHoy()}`;
+function yActualizarResumen(){
+  const v=pagosHoy.filter(p=>p.monto!=='?'&&p.monto!=='');
+  const total=v.reduce((s,p)=>s+parseFloat(p.monto||0),0);
+  const n=pagosHoy.length,prom=n>0?(total/n).toFixed(2):'0.00';
+  $('yResTotal').textContent=total.toFixed(2);
+  $('yResSub').textContent=`${n} pago${n!==1?'s':''} · S/ ${prom} promedio`;
+  $('yResLbl').textContent=`Total de hoy — ${fechaHoy()}`;
 }
-function agregarHist(d){
-  const lista=$('lista');
-  if(lista.querySelector('.empty')) lista.innerHTML='';
-  const div=document.createElement('div');
-  div.className='item';
+function agregarYItem(d){
+  const lista=$('yLista');
+  if(lista.querySelector('.empty'))lista.innerHTML='';
+  const div=document.createElement('div');div.className='yitem';
   const ini=(d.nombre[0]||'Y').toUpperCase();
   div.innerHTML=`<div class="av">${ini}</div>
     <div class="n">${d.nombre}<span>${new Date(d.ts).toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'})}</span></div>
     <div class="m">S/ ${d.monto}</div>`;
   lista.insertBefore(div,lista.firstChild);
-  $('contador').textContent=lista.querySelectorAll('.item').length;
+  $('yContador').textContent=lista.querySelectorAll('.yitem').length;
 }
-function exportarExcel(){
-  if(pagosHoy.length===0){ toast('No hay pagos para exportar'); return; }
-  const fecha=fechaHoy().replace(/\//g,'-');
-  const total=pagosHoy.filter(p=>p.monto!=='?'&&p.monto!=='').reduce((s,p)=>s+parseFloat(p.monto||0),0).toFixed(2);
-  let csv='\uFEFF';
-  csv+='N\u00b0,Nombre,Monto (S/),Hora\r\n';
-  pagosHoy.forEach((p,i)=>{
-    const hora=new Date(p.ts).toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});
-    const nombre='"'+p.nombre.replace(/"/g,'""')+'"';
-    csv+=`${i+1},${nombre},${p.monto},${hora}\r\n`;
-  });
-  csv+=`\r\n,TOTAL,${total},\r\n`;
-  csv+=`,Pagos,${pagosHoy.length},\r\n`;
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url; a.download=`Yape_${fecha}.csv`; a.click();
-  URL.revokeObjectURL(url);
-  toast(`Excel descargado — S/ ${total} total`);
-}
-
-/* ---------- polling Firebase ---------- */
-async function poll(){
-  if(!cfg.url){ setDot(false); return; }
-  const base=cfg.url.replace(/\/$/,'');
-  const url=`${base}/yape.json?orderBy="$key"&limitToLast=25`;
-  try{
-    const r=await fetch(url,{cache:'no-store'});
-    if(!r.ok) throw 0;
-    const data=await r.json();
-    setDot(true);
-    if(data){
-      const keys=Object.keys(data).sort();
-      for(const k of keys){
-        if(seen.has(k)) continue;
-        seen.add(k);
-        const d=parsear(data[k], k);
-        mostrar(d, !primerCarga);  // en la primera carga no suena
-      }
-    }
-    primerCarga=false;
-  }catch(e){ setDot(false); }
-}
-function setDot(on){ $('dot').classList.toggle('on',!!on); }
-function iniciarPoll(){
-  if(pollTimer) clearInterval(pollTimer);
-  seen=new Set(); primerCarga=true;
-  poll();
-  pollTimer=setInterval(poll,2500);
-}
-
-/* ---------- UI ---------- */
-function pintarModos(){
-  document.querySelectorAll('.modo').forEach(m=>{
-    m.classList.toggle('sel', m.dataset.modo===cfg.modo);
-  });
-}
-function toast(msg){
-  const t=$('toast'); t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),1800);
-}
-
-document.querySelectorAll('.modo').forEach(m=>{
-  m.onclick=()=>{ cfg.modo=m.dataset.modo; pintarModos(); guardar(); };
-});
-$('btnProbar').onclick=()=>{
-  if(actx&&actx.state==='suspended') actx.resume();
-  mostrar({nombre:'Juan Pérez',monto:'50.00',ts:Date.now()}, true);
-};
-$('btnLimpiar').onclick=()=>{
-  pagosHoy=[];
-  guardarPagos();
-  $('lista').innerHTML='<div class="empty">Aún no hay pagos registrados.</div>';
-  $('contador').textContent='0';
-  actualizarResumen();
-};
-$('btnExcel').onclick=exportarExcel;
-$('btnGuardar').onclick=()=>{
-  cfg.url=$('cfgUrl').value.trim();
-  cfg.frase=$('cfgFrase').value;
-  cfg.voz=$('cfgVoz').value;
-  cfg.vol=parseFloat($('cfgVol').value);
-  cfg.rep=$('cfgRep').checked;
-  cfg.rxMonto=$('cfgRxMonto').value;
-  cfg.rxNom=$('cfgRxNom').value;
-  guardar(); iniciarPoll(); toast('Configuración guardada ✓');
-  $('config').open=false;
-};
-
-/* ---------- arranque ---------- */
-function pintarConfig(){
-  $('cfgUrl').value=cfg.url; $('cfgFrase').value=cfg.frase;
-  $('cfgVol').value=cfg.vol; $('cfgRep').checked=cfg.rep;
-  $('cfgRxMonto').value=cfg.rxMonto; $('cfgRxNom').value=cfg.rxNom;
-}
-function reconstruirLista(){
-  if(pagosHoy.length===0) return;
-  const lista=$('lista'); lista.innerHTML='';
+function yReconstruirLista(){
+  if(!pagosHoy.length)return;
+  const lista=$('yLista');lista.innerHTML='';
   [...pagosHoy].reverse().forEach(d=>{
-    const div=document.createElement('div'); div.className='item';
+    const div=document.createElement('div');div.className='yitem';
     const ini=(d.nombre[0]||'Y').toUpperCase();
     div.innerHTML=`<div class="av">${ini}</div>
       <div class="n">${d.nombre}<span>${new Date(d.ts).toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'})}</span></div>
       <div class="m">S/ ${d.monto}</div>`;
     lista.appendChild(div);
   });
-  $('contador').textContent=pagosHoy.length;
+  $('yContador').textContent=pagosHoy.length;
 }
-cargar(); pintarModos(); pintarConfig();
-actualizarResumen();
+function exportarExcelYape(){
+  if(!pagosHoy.length){toast('No hay pagos para exportar','warn');return;}
+  const fecha=fechaHoy().replace(/\//g,'-');
+  const total=pagosHoy.filter(p=>p.monto!=='?').reduce((s,p)=>s+parseFloat(p.monto||0),0).toFixed(2);
+  let csv='\uFEFF'+'N\u00b0,Nombre,Monto (S/),Hora\r\n';
+  pagosHoy.forEach((p,i)=>{
+    const h=new Date(p.ts).toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});
+    csv+=`${i+1},"${p.nombre.replace(/"/g,'""')}",${p.monto},${h}\r\n`;
+  });
+  csv+=`\r\n,TOTAL,${total},\r\n,Pagos,${pagosHoy.length},\r\n`;
+  descargarCSV(csv,`Yape_${fecha}.csv`);
+  toast(`Excel descargado — S/ ${total}`);
+}
+
+// Poll Firebase
+async function poll(){
+  if(!yCfg.url){setDot(false);return;}
+  try{
+    const r=await fetch(`${yCfg.url.replace(/\/$/,'')}/yape.json?orderBy="$key"&limitToLast=50`,{cache:'no-store'});
+    if(!r.ok)throw 0;
+    const data=await r.json();setDot(true);
+    if(data){
+      const keys=Object.keys(data).sort();
+      for(const k of keys){
+        if(yapeSeenKeys.has(k))continue;
+        yapeSeenKeys.add(k);
+        mostrarPago(parsear(data[k],k),!primerCarga);
+      }
+    }
+    primerCarga=false;
+  }catch(e){setDot(false);}
+}
+function setDot(on){$('dot').classList.toggle('on',!!on);}
+function iniciarPoll(){
+  if(pollTimer)clearInterval(pollTimer);
+  yapeSeenKeys=new Set();primerCarga=true;
+  pagosHoy.forEach(p=>{if(p._key)yapeSeenKeys.add(p._key);});
+  poll();pollTimer=setInterval(poll,2500);
+}
+
+// Eventos Yape
+function pintarModos(){document.querySelectorAll('.modo').forEach(m=>m.classList.toggle('sel',m.dataset.modo===yCfg.modo));}
+document.querySelectorAll('.modo').forEach(m=>{m.onclick=()=>{yCfg.modo=m.dataset.modo;pintarModos();yGuardar();};});
+$('btnProbar').onclick=()=>{if(actx&&actx.state==='suspended')actx.resume();mostrarPago({nombre:'Juan Pérez',monto:'50.00',ts:Date.now()},true);};
+$('btnLimpiar').onclick=()=>{pagosHoy=[];yGuardarPagos();$('yLista').innerHTML='<div class="empty">Aún no hay pagos registrados.</div>';$('yContador').textContent='0';yActualizarResumen();};
+$('btnExcel').onclick=exportarExcelYape;
+$('btnGuardar').onclick=()=>{
+  yCfg.url=$('cfgUrl').value.trim();yCfg.frase=$('cfgFrase').value;
+  yCfg.voz=$('cfgVoz').value;yCfg.vol=parseFloat($('cfgVol').value);yCfg.rep=$('cfgRep').checked;
+  yGuardar();iniciarPoll();toast('Configuración guardada ✓');$('yCfg').open=false;
+};
+
+// ═══════════════════════════════════════════════════
+// MÓDULO ASISTENCIAS
+// ═══════════════════════════════════════════════════
+const LS_EMP  ='asis.empleadas';
+const LS_ASIS ='asis.asistencias';
+const LS_ACFG ='asis.config';
+let empleadas=[],asistencias={},aCfg={apiKey:''};
+let streamActivo=null,fotoNueva=null,huellaIdNueva=[],resultadoReconocido=null;
+
+function aCargarTodo(){
+  try{const s=localStorage.getItem(LS_EMP);if(s)empleadas=JSON.parse(s);}catch(e){}
+  try{const s=localStorage.getItem(LS_ASIS);if(s)asistencias=JSON.parse(s);}catch(e){}
+  try{const s=localStorage.getItem(LS_ACFG);if(s)aCfg=JSON.parse(s);}catch(e){}
+}
+function aGuardarTodo(){
+  localStorage.setItem(LS_EMP,JSON.stringify(empleadas));
+  localStorage.setItem(LS_ASIS,JSON.stringify(asistencias));
+  localStorage.setItem(LS_ACFG,JSON.stringify(aCfg));
+}
+
+// Empleadas UI
+function pintarEmpleadas(){
+  const g=$('empGrid');
+  if(!empleadas.length){g.innerHTML='<div class="empty">No hay empleadas registradas.</div>';return;}
+  g.innerHTML='';
+  empleadas.forEach(emp=>{
+    const div=document.createElement('div');div.className='emp-card';
+    const tC=!!emp.foto,tH=!!(emp.credIds&&emp.credIds.length);
+    div.innerHTML=`
+      <div class="efoto">${emp.foto?`<img src="${emp.foto}">`:'👤'}</div>
+      <div class="emp-info">
+        <div class="nombre">${emp.nombre}</div>
+        <div class="badges">
+          ${tC?'<span class="badge cara">📸 Cara</span>':''}
+          ${tH?`<span class="badge huella">🔐 ${emp.credIds.length} biométrico${emp.credIds.length>1?'s':''}</span>`:''}
+        </div>
+      </div>
+      <div class="emp-acts">
+        <button class="ico-btn" onclick="editarEmp('${emp.id}')">✏️</button>
+        <button class="ico-btn" style="color:var(--err)" onclick="eliminarEmp('${emp.id}')">🗑</button>
+      </div>`;
+    g.appendChild(div);
+  });
+}
+
+function editarEmp(id){
+  const emp=empleadas.find(e=>e.id===id);if(!emp)return;
+  $('nuevoNombre').value=emp.nombre;
+  fotoNueva=emp.foto||null;huellaIdNueva=emp.credIds||[];
+  if(fotoNueva){$('fotoImg').src=fotoNueva;$('fotoPreview').style.display='block';}
+  else $('fotoPreview').style.display='none';
+  $('huellaStatus').innerHTML=huellaIdNueva.length?huellaIdNueva.map(h=>`✓ ${h.etiqueta}`).join('<br>'):'Sin biométricos';
+  $('btnGuardarEmp').dataset.editId=id;
+  abrirModalNueva();
+}
+
+function eliminarEmp(id){
+  if(!confirm('¿Eliminar esta empleada?'))return;
+  empleadas=empleadas.filter(e=>e.id!==id);
+  aGuardarTodo();pintarEmpleadas();toast('Empleada eliminada','warn');
+}
+
+// Modal nueva empleada
+$('btnNuevaEmp').onclick=()=>{
+  fotoNueva=null;huellaIdNueva=[];
+  $('nuevoNombre').value='';$('fotoPreview').style.display='none';
+  $('huellaStatus').textContent='';
+  delete $('btnGuardarEmp').dataset.editId;
+  abrirModalNueva();
+};
+function abrirModalNueva(){$('modalNueva').classList.remove('hide');iniciarCamara('camVideo2','camCanvas2');}
+$('btnCerrarNueva').onclick=()=>{detenerCamara();$('modalNueva').classList.add('hide');};
+$('btnTomarFoto').onclick=()=>{
+  const foto=capturarFrame('camVideo2','camCanvas2');
+  if(!foto){toast('Sin cámara activa','err');return;}
+  fotoNueva=foto;$('fotoImg').src=foto;$('fotoPreview').style.display='block';
+  $('camFrame2').classList.add('ok');setTimeout(()=>$('camFrame2').classList.remove('ok'),800);
+  toast('Foto capturada ✓');
+};
+$('btnRegHuella').onclick=async()=>{
+  const nombre=$('nuevoNombre').value.trim()||'empleada';
+  const et=prompt(`Nombre para este biométrico (ej: Huella derecha, Cara):`,'Biométrico '+(huellaIdNueva.length+1));
+  if(!et)return;
+  try{
+    const id=await registrarBiometrico(nombre);
+    huellaIdNueva.push({id,etiqueta:et});
+    $('huellaStatus').innerHTML=huellaIdNueva.map(h=>`✓ ${h.etiqueta}`).join('<br>');
+    toast('✓ '+et+' registrado');
+  }catch(e){toast('No se pudo registrar: '+e.message,'err');}
+};
+$('btnGuardarEmp').onclick=()=>{
+  const nombre=$('nuevoNombre').value.trim();
+  if(!nombre){toast('Escribe el nombre','err');return;}
+  if(!fotoNueva){toast('Toma una foto primero','err');return;}
+  const editId=$('btnGuardarEmp').dataset.editId;
+  if(editId){
+    const emp=empleadas.find(e=>e.id===editId);
+    if(emp){emp.nombre=nombre;emp.foto=fotoNueva;emp.credIds=huellaIdNueva||[];}
+    toast('Empleada actualizada ✓');
+  }else{
+    empleadas.push({id:'e'+Date.now(),nombre,foto:fotoNueva,credIds:huellaIdNueva||[]});
+    toast('Empleada registrada ✓');
+  }
+  aGuardarTodo();detenerCamara();$('modalNueva').classList.add('hide');
+  pintarEmpleadas();aActualizarResumen();
+};
+
+// Cámara
+async function iniciarCamara(vid,can){
+  try{
+    detenerCamara();
+    const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false});
+    streamActivo=s;$(vid).srcObject=s;
+  }catch(e){toast('Sin acceso a cámara: '+e.message,'err');}
+}
+function detenerCamara(){if(streamActivo){streamActivo.getTracks().forEach(t=>t.stop());streamActivo=null;}}
+function capturarFrame(vid,can){
+  const v=$(vid),c=$(can);if(!v.srcObject)return null;
+  c.width=v.videoWidth||320;c.height=v.videoHeight||240;
+  c.getContext('2d').drawImage(v,0,0,c.width,c.height);
+  return c.toDataURL('image/jpeg',.85);
+}
+
+// Modal reconocimiento
+$('btnAbrirCam').onclick=()=>{
+  if(!empleadas.length){toast('Registra empleadas primero','warn');return;}
+  if(!aCfg.apiKey){toast('Configura API Key en ⚙️ Config','warn');return;}
+  resultadoReconocido=null;
+  $('resultadoBox').classList.remove('vis');
+  $('btnCapturar').style.display='';$('btnConfirmar').style.display='none';
+  $('camFrame').classList.remove('ok');
+  $('modalCam').classList.remove('hide');
+  iniciarCamara('camVideo','camCanvas');
+};
+$('btnCerrarCam').onclick=()=>{detenerCamara();$('modalCam').classList.add('hide');};
+$('btnCapturar').onclick=async()=>{
+  const foto=capturarFrame('camVideo','camCanvas');
+  if(!foto){toast('Sin imagen','err');return;}
+  $('btnCapturar').innerHTML='<span class="spin"></span>Analizando…';$('btnCapturar').disabled=true;
+  try{
+    const emp=await reconocerCara(foto);
+    if(emp){
+      resultadoReconocido={emp,foto};
+      $('resFotoEl').innerHTML=emp.foto?`<img src="${emp.foto}" style="width:55px;height:55px;border-radius:50%;object-fit:cover">`:'👤';
+      $('resNombre').textContent=emp.nombre;
+      $('resSub2').textContent='Empleada reconocida';
+      $('resConf').textContent='¿Confirmar asistencia?';$('resConf').style.color='var(--ok)';
+      $('resultadoBox').classList.add('vis');$('camFrame').classList.add('ok');
+      $('btnCapturar').style.display='none';$('btnConfirmar').style.display='';
+    }else{
+      $('resFotoEl').textContent='❓';$('resNombre').textContent='No reconocida';
+      $('resSub2').textContent='No coincide con ninguna empleada';
+      $('resConf').textContent='Intenta con mejor iluminación';$('resConf').style.color='var(--err)';
+      $('resultadoBox').classList.add('vis');
+    }
+  }catch(e){toast('Error: '+e.message,'err');}
+  $('btnCapturar').innerHTML='📸 Capturar';$('btnCapturar').disabled=false;
+};
+$('btnConfirmar').onclick=()=>{
+  if(!resultadoReconocido)return;
+  marcarAsistencia(resultadoReconocido.emp.id,horaAhora(),'cara');
+  detenerCamara();$('modalCam').classList.add('hide');$('camFrame').classList.remove('ok');
+  toast('✓ Asistencia: '+resultadoReconocido.emp.nombre);
+};
+
+// Reconocimiento facial
+async function reconocerCara(fotoLive){
+  const refs=empleadas.filter(e=>e.foto);
+  if(!refs.length)throw new Error('Ninguna empleada tiene foto');
+  const content=[{type:'text',text:'Eres un sistema de reconocimiento facial para asistencias. Fotos de empleadas registradas:'}];
+  refs.forEach((emp,i)=>{
+    content.push({type:'text',text:`\nEmpleada ${i+1}: "${emp.nombre}" ID:${emp.id}`});
+    content.push({type:'image',source:{type:'base64',media_type:'image/jpeg',data:emp.foto.split(',')[1]}});
+  });
+  content.push({type:'text',text:'\nFoto actual para marcar asistencia:'});
+  content.push({type:'image',source:{type:'base64',media_type:'image/jpeg',data:fotoLive.split(',')[1]}});
+  content.push({type:'text',text:'\n¿Coincide con alguna empleada? Responde SOLO JSON sin texto extra:\n{"reconocida":true,"id":"ID","nombre":"NOMBRE"}\no si no coincide:\n{"reconocida":false,"id":null,"nombre":null}'});
+  const resp=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':aCfg.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:150,messages:[{role:'user',content}]})
+  });
+  if(!resp.ok){const e=await resp.json();throw new Error(e.error?.message||'Error API');}
+  const data=await resp.json();
+  const txt=data.content.map(b=>b.text||'').join('').trim();
+  let r;try{r=JSON.parse(txt.replace(/```json|```/g,'').trim());}catch(e){throw new Error('Respuesta inválida');}
+  if(!r.reconocida)return null;
+  return empleadas.find(e=>e.id===r.id)||null;
+}
+
+// WebAuthn
+async function registrarBiometrico(nombre){
+  const chal=crypto.getRandomValues(new Uint8Array(32));
+  const uid=crypto.getRandomValues(new Uint8Array(16));
+  const cred=await navigator.credentials.create({publicKey:{
+    challenge:chal,rp:{name:'Total Tools',id:location.hostname},
+    user:{id:uid,name:nombre,displayName:nombre},
+    pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+    authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},
+    timeout:60000
+  }});
+  return btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
+}
+async function verificarBiometrico(emp){
+  const chal=crypto.getRandomValues(new Uint8Array(32));
+  const opts={publicKey:{challenge:chal,timeout:60000,userVerification:'required',rpId:location.hostname}};
+  if(emp.credIds&&emp.credIds.length){
+    opts.publicKey.allowCredentials=emp.credIds.map(h=>({type:'public-key',id:Uint8Array.from(atob(h.id),c=>c.charCodeAt(0))}));
+  }
+  await navigator.credentials.get(opts);return true;
+}
+
+// Botón biométrico marcar
+$('btnHuella').onclick=async()=>{
+  const conH=empleadas.filter(e=>e.credIds&&e.credIds.length);
+  if(!conH.length){toast('Ninguna empleada tiene biométrico','warn');return;}
+  let emp;
+  if(conH.length===1){emp=conH[0];}
+  else{
+    const ns=conH.map((e,i)=>`${i+1}. ${e.nombre}`).join('\n');
+    const idx=parseInt(prompt(`¿Quién va a marcar?\n${ns}\nEscribe el número:`));
+    if(!idx||idx<1||idx>conH.length){toast('Cancelado','warn');return;}
+    emp=conH[idx-1];
+  }
+  try{
+    toast(`Coloca tu biométrico: ${emp.nombre}`,'ok');
+    await verificarBiometrico(emp);
+    marcarAsistencia(emp.id,horaAhora(),'biométrico');
+    toast('✓ Asistencia: '+emp.nombre);
+  }catch(e){toast('Biométrico no verificado','err');}
+};
+
+// Marcar asistencia
+function marcarAsistencia(empId,hora,metodo){
+  const f=fechaHoy();
+  if(!asistencias[f])asistencias[f]=[];
+  if(asistencias[f].find(a=>a.empId===empId)){toast('Ya tiene asistencia hoy','warn');return;}
+  asistencias[f].push({empId,hora,metodo});
+  aGuardarTodo();pintarAsistenciaHoy();
+}
+
+function pintarAsistenciaHoy(){
+  const f=fechaHoy(),regs=asistencias[f]||[];
+  const lista=$('aLista');lista.innerHTML='';
+  if(!empleadas.length){lista.innerHTML='<div class="empty">Registra empleadas primero.</div>';return;}
+  empleadas.forEach(emp=>{
+    const r=regs.find(a=>a.empId===emp.id);
+    const div=document.createElement('div');div.className='asis-card';
+    div.innerHTML=`
+      <div class="afoto">${emp.foto?`<img src="${emp.foto}">`:'👤'}</div>
+      <div class="asis-info">
+        <div class="nombre">${emp.nombre}</div>
+        <div class="hora">${r?`${r.hora} — ${r.metodo}`:'Sin marcar hoy'}</div>
+      </div>
+      <div class="asis-estado">${r?'✅':'⬜'}</div>`;
+    lista.appendChild(div);
+  });
+  aActualizarResumen();
+}
+
+function aActualizarResumen(){
+  const f=fechaHoy(),n=(asistencias[f]||[]).length,t=empleadas.length;
+  $('aPresentes').textContent=n;$('aAusentes').textContent=Math.max(0,t-n);$('aTotal').textContent=t;
+}
+
+// Historial
+function pintarHistorial(){
+  const c=$('histContainer'),fechas=Object.keys(asistencias).sort().reverse();
+  if(!fechas.length){c.innerHTML='<div class="empty">Sin historial aún.</div>';return;}
+  c.innerHTML='';
+  fechas.forEach(f=>{
+    const regs=asistencias[f];
+    const div=document.createElement('div');div.className='hist-dia';
+    div.innerHTML=`<div class="hd"><span>📅 ${f}</span><span>${regs.length} presentes</span></div>`;
+    regs.forEach(r=>{
+      const emp=empleadas.find(e=>e.id===r.empId);
+      const row=document.createElement('div');row.className='hist-row';
+      row.innerHTML=`<span class="hn">${emp?emp.nombre:'(eliminada)'}</span><span class="hh">${r.hora} ${r.metodo==='cara'?'📸':'🔐'}</span>`;
+      div.appendChild(row);
+    });
+    c.appendChild(div);
+  });
+}
+
+// Excel asistencias
+function exportarExcelAsis(){
+  const f=fechaHoy(),regs=asistencias[f]||[];
+  let csv='\uFEFF'+`Asistencia — ${f}\r\n\r\nN\u00b0,Nombre,Hora,Método,Estado\r\n`;
+  empleadas.forEach((emp,i)=>{
+    const r=regs.find(a=>a.empId===emp.id);
+    csv+=`${i+1},"${emp.nombre}",${r?r.hora:'-'},${r?r.metodo:'-'},${r?'Presente':'Ausente'}\r\n`;
+  });
+  csv+=`\r\nPresentes,${regs.length}\r\nAusentes,${Math.max(0,empleadas.length-regs.length)}\r\n`;
+  descargarCSV(csv,`Asistencia_${f.replace(/\//g,'-')}.csv`);toast('Excel descargado ✓');
+}
+function exportarExcelMes(){
+  const fechas=Object.keys(asistencias).sort();
+  if(!fechas.length){toast('Sin historial','warn');return;}
+  let csv='\uFEFF'+'Fecha,Nombre,Hora,Método,Estado\r\n';
+  fechas.forEach(f=>{empleadas.forEach(emp=>{
+    const r=(asistencias[f]||[]).find(a=>a.empId===emp.id);
+    csv+=`${f},"${emp.nombre}",${r?r.hora:'-'},${r?r.metodo:'-'},${r?'Presente':'Ausente'}\r\n`;
+  });});
+  descargarCSV(csv,'Asistencias_mes.csv');toast('Excel del mes descargado ✓');
+}
+function descargarCSV(csv,nombre){
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=nombre;a.click();URL.revokeObjectURL(url);
+}
+$('btnExcelAsis').onclick=exportarExcelAsis;
+$('btnExcelHist').onclick=exportarExcelMes;
+$('btnGuardarACfg').onclick=()=>{aCfg.apiKey=$('aApiKey').value.trim();aGuardarTodo();toast('API Key guardada ✓');};
+$('btnBorrarAsis').onclick=()=>{
+  if(!confirm('¿Borrar todos los datos de asistencias?'))return;
+  empleadas=[];asistencias=[];aGuardarTodo();pintarAsistenciaHoy();pintarEmpleadas();toast('Datos borrados','warn');
+};
+
+// ═══════════════════════════════════════════════════
+// ARRANQUE
+// ═══════════════════════════════════════════════════
+yCargar();aCargarTodo();
+pintarModos();
+$('cfgUrl').value=yCfg.url;$('cfgFrase').value=yCfg.frase;$('cfgVol').value=yCfg.vol;$('cfgRep').checked=yCfg.rep;
+yReconstruirLista();yActualizarResumen();
+aActualizarResumen();
 cargarVoces();
-if('speechSynthesis' in window) speechSynthesis.onvoiceschanged=cargarVoces;
+if('speechSynthesis' in window)speechSynthesis.onvoiceschanged=cargarVoces;
 iniciarPoll();
-// desbloquear audio en el primer toque (requisito de los navegadores)
-document.body.addEventListener('click',()=>{ if(actx&&actx.state==='suspended')actx.resume(); },{once:true});
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('/Yapeclock/sw.js').catch(()=>{});
-}
+document.body.addEventListener('click',()=>{if(actx&&actx.state==='suspended')actx.resume();},{once:true});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('/Yapeclock/sw.js').catch(()=>{});
 </script>
 </body>
 </html>
